@@ -2,15 +2,20 @@
 function GameBoard(){
     const rows = 3;
     const columns = 3;
-    board = []
+    let board = []
     
-    //2-D array to represent the board
-    for (let i = 0; i < rows; i++){
-        board[i] = [];
-        for (let j = 0; j < columns; j++){
-            board[i].push(Cell())
+    //initializing game board to be able to reset
+    //game easily
+    const initializeBoard = () => {
+        board = []
+        for (let i = 0; i < rows; i++){
+            board[i] = [];
+            for (let j = 0; j < columns; j++){
+                board[i].push(Cell())
+            }
         }
-    }
+    };
+    initializeBoard();
     const getBoard = () => board;
 
     const placeMaker = (row, column, player) => {
@@ -27,7 +32,11 @@ function GameBoard(){
         .map((cell) => cell.getValue()))
         console.log(boardWithCellValues);
     }
-    return {getBoard, placeMaker, printBoard}
+    const reset = () => initializeBoard();
+    return {getBoard,
+        placeMaker,
+        printBoard,
+        reset}
 
 }
 function Cell(){
@@ -73,9 +82,66 @@ function gameController(
         )
         board.placeMaker(row, column, getActivePlayer().token)
         //winner logic
-        const getwinnerPlayer = () => {
+        const getWinnerPlayer = (player) => {
+            //logic checking if player got all row's cell
+            const baordArray = board.getBoard();
+            const size = 3;
+            for (let row of baordArray){
+                if(row.every((cell) => cell.getValue() === player)){
+                    console.log(`player ${player} win round (row)`);
+                    return true;
+                }
+            }
+            //checking if player got all three column
+            //remember: the inner loop is being treated as row that would be
+            // for col = 0 (outer loop) inner loop would be [0][0], [1][0] and [2][0]  
+            for (let col = 0; col < size; col++){
+                let isWinningColumn = true;
+                for (let row = 0; row < size; row++){
+                    if (baordArray[row][col].getValue() !== player){
+                        isWinningColumn = false;
+                        break;
+                    }
+                }
+                if (isWinningColumn){
+                    console.log(`${player} won this round (column)`)
+                    return true;
+                }
+                //checking for diagonal win
+                //checking top left to bottom right corner for indeces[0][0], [1][1], [2][2]
+                if (baordArray.every((row, idx) => row[idx].getValue() === player)){
+                    console.log(`${player} won (diagonal)`);
+                    return true;
+                }
+                //top right to bottom left
+                //checking for the indeces [0][2], [1][1], and [2][0]
+                if (baordArray.every((row, idx) => row[size - idx - 1].getValue() === player)){
+                    console.log(`${player} won the round (diagonal)`);
+                    return true;
+                }
+                //checking for tie
+                //all game bord cell must be occupied by the players tokens
+                const isBoardFull = baordArray.every((row) => row.every((cell) => cell.getValue() !== 0))
+                if (isBoardFull){
+                    console.log("it's a tie")
+                    return true;
+                }
+                //end the game.
+                return false;
 
+
+            };
         }
+        const hasWinner = getWinnerPlayer(getActivePlayer().token);
+        if (hasWinner){
+            console.log("game Over");
+            board.reset(); //reseting board
+            console.log("board has been reset");
+            printNewRound();
+            return;
+        }
+
+        getWinnerPlayer(getActivePlayer().token);
         swithchPlayerTurn();
         printNewRound();
     };
