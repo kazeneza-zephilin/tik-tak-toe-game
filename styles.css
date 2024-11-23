@@ -1,0 +1,44 @@
+body {
+    font-family: 'irish grover', sans-serif;
+}
+.title {
+    text-align: center;
+
+}
+.sub-heading-text-one {
+    color: red;
+}
+.sub-heading-text-two {
+    color: green;
+}
+.sub-heading-text-three {
+    color: blue;
+}
+.turn {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+}
+.board {
+    display: grid;
+    height: 500px;
+    width: 500px;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    border: 1px solid black;
+    gap: 2px;
+    padding: 2px;
+    background-color: red;
+    margin: 20px auto;
+  }
+  
+  .cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 2rem;
+    border: 1px solid grey;
+    background: lightyellow;
+    cursor: pointer;
+  }

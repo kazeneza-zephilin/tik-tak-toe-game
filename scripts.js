@@ -149,8 +149,60 @@ function gameController(
     printNewRound();
     return {
         playRound,
-        getActivePlayer
+        getActivePlayer,
+        getBoard: board.getBoard
     };
 }
+// we nolenger need this game object, all game will be
+//contrelled with DOM elements
+//const game = gameController();
 
-const game = gameController();
+function screenController() {
+    const game = gameController();
+    const playerTurnDiv = document.querySelector('.turn');
+    const boardDiv = document.querySelector('.board');
+
+    const updateScreen = () => {
+        //clear the board
+        boardDiv.textContent = ""
+
+        //get the most up to date board and active player
+        const board = game.getBoard()
+        const activePlayer = game.getActivePlayer()
+
+        //disaplay the player's turn
+        playerTurnDiv.textContent = `${activePlayer.name}'s turn...`
+
+        //render board squares
+        board.forEach((row, rowIdx) => {
+            row.forEach((cell, colIdx) => {
+                const cellButton = document.createElement("button");
+                cellButton.classList.add("cell");
+                //creating data attribute to easily access the cell
+                //rows and column positions
+                cellButton.dataset.row = rowIdx;
+                cellButton.dataset.column = colIdx;
+                cellButton.textContent = cell.getValue();
+                boardDiv.appendChild(cellButton);
+            })
+        })
+
+
+    }
+    //add event listener to the board
+    function boardClickHandler(e){
+        const selectedRow = e.target.dataset.row;
+        const selectedColumn = e.target.dataset.column;
+        //check if user clicked in the cell square not
+        //gap inbetween
+        if ((!selectedRow) || (!selectedColumn)) return
+        game.playRound(selectedRow, selectedColumn)
+        updateScreen()
+    }
+    boardDiv.addEventListener("click", boardClickHandler);
+    //initioal render
+    updateScreen();
+    // we don't need to return anything because everything is encapsulated
+    //inside screenController.
+}
+screenController();
