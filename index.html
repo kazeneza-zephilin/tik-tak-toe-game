@@ -14,6 +14,23 @@
     <script src="scripts.js" defer></script>
   </head>
   <body>
+    <dialog id="my-dialog" open>
+      <p class="title">Enter player's names</p>
+      <form id="my-form">
+        <div class="name-inputs">
+          <p>
+            <label for="first-player">first player name</label>
+            <input type="text" id="first-player" name="first-player">
+          </p>
+          <p>
+            <label for="second-player">second player name</label>
+            <input type="text" id="second-player" name="second-player">
+          </p>
+        </div>
+        <button id="confirmBtn" value="default">Confirm</button>
+
+      </form>
+    </dialog>
     <h1 class="title">
       Welcome to <span class="sub-heading-text-one">tik</span>
       <span class="sub-heading-text-two">tak</span>
@@ -21,6 +38,18 @@
     </h1>
     <div class="main-container">
       <div class="turn"></div>
+      <div class="marks">
+        <div class="left-player">
+          <p class="player-one"></p>
+          <div class="token-one"></div>
+          <div class="mark-one"></div>
+        </div>
+        <div class="right-player">
+          <p class="player-two"></p>
+          <div class="token-two"></div>
+          <div class="mark-two"></div>
+        </div>
+      </div>
       <div class="board"></div>
     </div>
   </body>

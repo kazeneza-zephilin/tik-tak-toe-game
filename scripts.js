@@ -1,208 +1,214 @@
-/*tik tak toe console version*/
-function GameBoard(){
+const updatePlayerNames = (callback) => {
+    const dialog = document.querySelector("#my-dialog");
+    const form = document.querySelector('#my-form');
+  
+    form.addEventListener('submit', (e) => {
+        e.preventDefault(); // prevent page reload
+        const formData = new FormData(form); // getting form data
+        const firstPlayerNames = formData.get("first-player");
+        const secondPlayerNames = formData.get("second-player");
+        const playerOneNamesDiv = document.querySelector(".player-one");
+        const playerTwoNamesDiv = document.querySelector(".player-two");
+  
+        // Updating the UI
+        playerOneNamesDiv.textContent = `first player name: ${firstPlayerNames}`;
+        playerTwoNamesDiv.textContent = `second player name: ${secondPlayerNames}`;
+  
+        dialog.close();
+        // Calling the callback to continue initializing the game
+        callback(firstPlayerNames, secondPlayerNames);
+    });
+  };
+  
+  function GameBoard() {
     const rows = 3;
     const columns = 3;
-    let board = []
-    
-    //initializing game board to be able to reset
-    //game easily
+    let board = [];
+  
     const initializeBoard = () => {
-        board = []
-        for (let i = 0; i < rows; i++){
+        board = [];
+        for (let i = 0; i < rows; i++) {
             board[i] = [];
-            for (let j = 0; j < columns; j++){
-                board[i].push(Cell())
+            for (let j = 0; j < columns; j++) {
+                board[i].push(Cell());
             }
         }
     };
     initializeBoard();
+  
     const getBoard = () => board;
-
+  
     const placeMaker = (row, column, player) => {
-        //checking if cell is empty
-        const validCell = board[row][column].getValue() === 0;
-        if(!validCell) return
-        board[row][column].addMaker(player)
-    }
-    //printing the running board as player change
-    //this should be removed after bulding UI
-    const printBoard = () => {
-        const boardWithCellValues = board
-        .map((row) => row
-        .map((cell) => cell.getValue()))
-        console.log(boardWithCellValues);
-    }
+      //change the checker here from 0 to ' ' 
+        const validCell = board[row][column].getValue() === ' ';
+        if (!validCell) return;
+        board[row][column].addMaker(player);
+    };
+  
     const reset = () => initializeBoard();
-    return {getBoard,
+  
+    return {
+        getBoard,
         placeMaker,
-        printBoard,
-        reset}
-
-}
-function Cell(){
-    let value = 0
-    const addMaker = (player) => value = player;
+        reset
+    };
+  }
+  
+  function Cell() {
+      //change from 0 to ''
+    let value = ' ';
+    const addMaker = (player) => (value = player);
     const getValue = () => value;
     return {
         addMaker,
         getValue
-    }
-
-}
-
-function gameController(
-    playerOneName= "player one",
-    playerTwoName = "player two"
-){
+    };
+  }
+  
+  function gameController(
+    playerOneName = "Player One",
+    playerTwoName = "Player Two"
+  ) {
     const board = GameBoard();
     const players = [
-        {
-            name: playerOneName,
-            token: 'X'
-        },
-        {
-            name:playerTwoName,
-            token: 'O'
-        }];
+        { name: playerOneName, token: 'X' },
+        { name: playerTwoName, token: 'O' }
+    ];
     let activePlayer = players[0];
-    const swithchPlayerTurn = () => {
-        activePlayer = activePlayer === players[0]? players[1]:players[0];
-    }
+  
+    const switchPlayerTurn = () => {
+        activePlayer = activePlayer === players[0] ? players[1] : players[0];
+    };
+  
     const getActivePlayer = () => activePlayer;
-
-    const printNewRound = () => {
-        board.printBoard();
-        console.log(`${getActivePlayer().name}'s turn.`);
-    }
-    const playRound = (row, column) => {
-        //placing a marker for current user
-        console.log(
-            `placing ${getActivePlayer().name}'s token into
-            row ${row} and column ${column}`
-        )
-        board.placeMaker(row, column, getActivePlayer().token)
-        //winner logic
-        const getWinnerPlayer = (player) => {
-            //logic checking if player got all row's cell
-            const baordArray = board.getBoard();
-            const size = 3;
-            for (let row of baordArray){
-                if(row.every((cell) => cell.getValue() === player)){
-                    console.log(`player ${player} win round (row)`);
-                    return true;
+  
+    const getWinnerPlayer = (player) => {
+        const boardArray = board.getBoard();
+        const size = 3;
+  
+        // Check rows
+        for (let row of boardArray) {
+            if (row.every((cell) => cell.getValue() === player)) {
+                return true;
+            }
+        }
+  
+        // Check columns
+        for (let col = 0; col < size; col++) {
+            let isWinningColumn = true;
+            for (let row = 0; row < size; row++) {
+                if (boardArray[row][col].getValue() !== player) {
+                    isWinningColumn = false;
+                    break;
                 }
             }
-            //checking if player got all three column
-            //remember: the inner loop is being treated as row that would be
-            // for col = 0 (outer loop) inner loop would be [0][0], [1][0] and [2][0]  
-            for (let col = 0; col < size; col++){
-                let isWinningColumn = true;
-                for (let row = 0; row < size; row++){
-                    if (baordArray[row][col].getValue() !== player){
-                        isWinningColumn = false;
-                        break;
-                    }
-                }
-                if (isWinningColumn){
-                    console.log(`${player} won this round (column)`)
-                    return true;
-                }
-                //checking for diagonal win
-                //checking top left to bottom right corner for indeces[0][0], [1][1], [2][2]
-                if (baordArray.every((row, idx) => row[idx].getValue() === player)){
-                    console.log(`${player} won (diagonal)`);
-                    return true;
-                }
-                //top right to bottom left
-                //checking for the indeces [0][2], [1][1], and [2][0]
-                if (baordArray.every((row, idx) => row[size - idx - 1].getValue() === player)){
-                    console.log(`${player} won the round (diagonal)`);
-                    return true;
-                }
-                //checking for tie
-                //all game bord cell must be occupied by the players tokens
-                const isBoardFull = baordArray.every((row) => row.every((cell) => cell.getValue() !== 0))
-                if (isBoardFull){
-                    console.log("it's a tie")
-                    return true;
-                }
-                //end the game.
-                return false;
-
-
-            };
+            if (isWinningColumn) {
+                return true;
+            }
         }
-        const hasWinner = getWinnerPlayer(getActivePlayer().token);
-        if (hasWinner){
-            console.log("game Over");
-            board.reset(); //reseting board
-            console.log("board has been reset");
-            printNewRound();
-            return;
+  
+        // Check diagonals
+        if (boardArray.every((row, idx) => row[idx].getValue() === player)) {
+            return true;
         }
-
-        getWinnerPlayer(getActivePlayer().token);
-        swithchPlayerTurn();
-        printNewRound();
+        if (boardArray.every((row, idx) => row[size - idx - 1].getValue() === player)) {
+            return true;
+        }
+  
+        return false; // No winner
     };
-    //Initial play game message.
-    printNewRound();
+  
+    const playRound = (row, column) => {
+        board.placeMaker(row, column, getActivePlayer().token);
+  
+        if (getWinnerPlayer(getActivePlayer().token)) {
+            console.log(`${getActivePlayer().name} wins the round!`);
+            board.reset();
+            return getActivePlayer().token;
+        }
+  
+        //change full board logic from 0 check to ' 'check
+        const isBoardFull = board.getBoard().every((row) =>
+            row.every((cell) => cell.getValue() !== ' ')
+        );
+        if (isBoardFull) {
+            console.log("It's a tie!");
+            board.reset();
+            return null;
+        }
+  
+        switchPlayerTurn();
+        return null;
+    };
+  
     return {
         playRound,
         getActivePlayer,
         getBoard: board.getBoard
     };
-}
-// we nolenger need this game object, all game will be
-//contrelled with DOM elements
-//const game = gameController();
-
-function screenController() {
-    const game = gameController();
+  }
+  
+  function screenController() {
     const playerTurnDiv = document.querySelector('.turn');
     const boardDiv = document.querySelector('.board');
+    const tokenOneDiv = document.querySelector(".token-one");
+    const tokenTwoDiv = document.querySelector(".token-two");
+    const playerOneScoreDiv = document.querySelector(".mark-one");
+    const playerTwoScoreDiv = document.querySelector(".mark-two");
+  
+    let game = null;
+    let updateScreen = null;
+    let playerOneScore = 0;
+    let playerTwoScore = 0;
+  
+    updatePlayerNames((firstPlayerNames, secondPlayerNames) => {
+        game = gameController(firstPlayerNames, secondPlayerNames);
+        updateScreen = () => {
+            boardDiv.textContent = ""; // Clear the board
+  
+            const board = game.getBoard();
+            const activePlayer = game.getActivePlayer();
 
-    const updateScreen = () => {
-        //clear the board
-        boardDiv.textContent = ""
-
-        //get the most up to date board and active player
-        const board = game.getBoard()
-        const activePlayer = game.getActivePlayer()
-
-        //disaplay the player's turn
-        playerTurnDiv.textContent = `${activePlayer.name}'s turn...`
-
-        //render board squares
-        board.forEach((row, rowIdx) => {
-            row.forEach((cell, colIdx) => {
-                const cellButton = document.createElement("button");
-                cellButton.classList.add("cell");
-                //creating data attribute to easily access the cell
-                //rows and column positions
-                cellButton.dataset.row = rowIdx;
-                cellButton.dataset.column = colIdx;
-                cellButton.textContent = cell.getValue();
-                boardDiv.appendChild(cellButton);
-            })
-        })
-
-
-    }
-    //add event listener to the board
-    function boardClickHandler(e){
+            tokenOneDiv.textContent = `Token: X` //temporary hard coded 
+            tokenTwoDiv.textContent = 'Token: O' //temporary hard coded
+            playerTurnDiv.textContent = `${activePlayer.name}'s turn...`;
+            playerOneScoreDiv.textContent = `Score: ${playerOneScore}`;
+            playerTwoScoreDiv.textContent = `Score: ${playerTwoScore}`;
+  
+            board.forEach((row, rowIdx) => {
+                row.forEach((cell, colIdx) => {
+                    const cellButton = document.createElement("button");
+                    cellButton.classList.add("cell");
+                    cellButton.dataset.row = rowIdx;
+                    cellButton.dataset.column = colIdx;
+                    cellButton.textContent = cell.getValue();
+                    boardDiv.appendChild(cellButton);
+                });
+            });
+        };
+  
+        updateScreen();
+    });
+  
+    function boardClickHandler(e) {
         const selectedRow = e.target.dataset.row;
         const selectedColumn = e.target.dataset.column;
-        //check if user clicked in the cell square not
-        //gap inbetween
-        if ((!selectedRow) || (!selectedColumn)) return
-        game.playRound(selectedRow, selectedColumn)
-        updateScreen()
+  
+        if (!selectedRow || !selectedColumn) return;
+  
+        const winner = game.playRound(selectedRow, selectedColumn);
+  
+        if (winner === 'X') {
+            playerOneScore++;
+  
+        } else if (winner === 'O') {
+            playerTwoScore++;
+        }
+        updateScreen();
     }
+  
     boardDiv.addEventListener("click", boardClickHandler);
-    //initioal render
-    updateScreen();
-    // we don't need to return anything because everything is encapsulated
-    //inside screenController.
-}
-screenController();
+  }
+  
+  screenController();
+  
